@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Patient Check-In</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body { 
+    font-family: 'Helvetica', 'Arial', sans-serif; 
+    background-color: #f5f5f5; 
+    padding: 30px; 
+    font-size: 20px; 
+    color: rgba(0,106,170,1); 
+}
+
+#logoContainer { 
+    text-align: center; 
+    margin-bottom: 20px; 
+}
+
+#logoContainer img { 
+    max-width: 300px; 
+    width: 100%; 
+    height: auto; 
+    border-radius: 12px; 
+}
+
+#date { 
+    text-align: center; 
+    font-size: 24px; 
+    font-weight: bold; 
+    margin-bottom: 10px; 
+    color: rgba(0,106,170,1);
+}
+
+#clock { 
+    text-align: center; 
+    font-size: 28px; 
+    font-weight: bold; 
+    margin-bottom: 20px; 
+    color: rgba(0,106,170,1); 
+}
+
+.form-container { 
+    max-width: 600px; 
+    margin: auto; 
+    background-color: #fff; 
+    padding: 25px; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+    position: relative; 
+    color: rgba(0,106,170,1);
+}
+
+label { 
+    display: block; 
+    margin-bottom: 8px; 
+    font-weight: bold; 
+    color: rgba(0,106,170,1); 
+}
+
+input[type="text"], select { 
+    width: 100%; 
+    padding: 15px; 
+    font-size: 20px; 
+    border-radius: 8px; 
+    border: 2px solid rgba(14,168,200,1); 
+    margin-bottom: 20px; 
+    box-sizing: border-box; 
+    color: rgba(0,106,170,1);
+    background-color: transparent;
+}
+
+.dob-selects { 
+    display: flex; 
+    gap: 10px; 
+    margin-bottom: 20px; 
+}
+
+.dob-selects select { 
+    flex: 1; 
+}
+
+.toggle-group { 
+    display: flex; 
+    gap: 15px; 
+    flex-wrap: wrap; 
+    margin-bottom: 20px; 
+}
+
+.toggle-group input[type="radio"] { 
+    display: none; 
+}
+
+.toggle-group label { 
+    padding: 15px 20px; 
+    border: 2px solid rgba(14,168,200,1); 
+    border-radius: 10px; 
+    cursor: pointer; 
+    user-select: none; 
+    font-size: 20px; 
+    transition: all 0.2s ease-in-out; 
+    text-align: center; 
+    flex: 1; 
+    background-color: transparent; 
+    color: rgba(0,106,170,1); 
+}
+
+.toggle-group label:hover { 
+    background-color: rgba(171,206,33,1); 
+    color: #fff;
+}
+
+.toggle-group input[type="radio"]:checked + label { 
+    background-color: rgba(0,106,170,1); 
+    color: #fff; 
+    border-color: rgba(14,168,200,1); 
+}
+
+button[type="submit"] { 
+    width: 100%; 
+    padding: 18px; 
+    font-size: 24px; 
+    background-color: rgba(0,106,170,1); 
+    color: #fff; 
+    border: 2px solid rgba(14,168,200,1); 
+    border-radius: 12px; 
+    cursor: pointer; 
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out; 
+}
+
+button[type="submit"]:hover { 
+    background-color: rgba(171,206,33,1); 
+    color: #fff;
+}
+
+#thankYouMsg { 
+    display: none; 
+    background-color: #e6f0ff; 
+    padding: 20px; 
+    border-radius: 10px; 
+    text-align: center; 
+    margin-bottom: 20px; 
+    font-size: 22px; 
+    color: rgba(0,106,170,1); 
+}
+
+#previewInfo { 
+    background-color: #f0f8ff; 
+    padding: 15px; 
+    border-radius: 10px; 
+    margin-bottom: 20px; 
+    font-size: 20px; 
+    color: rgba(0,106,170,1); 
+    display: none; 
+}
+
+.lang-group { 
+    display: flex; 
+    justify-content: center; 
+    gap: 10px; 
+    margin-bottom: 20px; 
+    flex-wrap: wrap; 
+}
+
+.lang-group input[type="radio"] { 
+    display: none; 
+}
+
+.lang-group label { 
+    padding: 10px 15px; 
+    border: 2px solid rgba(14,168,200,1); 
+    border-radius: 8px; 
+    cursor: pointer; 
+    user-select: none; 
+    font-size: 18px; 
+    transition: all 0.2s ease-in-out; 
+    background-color: transparent; 
+    color: rgba(0,106,170,1); 
+}
+
+.lang-group label:hover { 
+    background-color: rgba(171,206,33,1); 
+    color: #fff;
+}
+
+.lang-group input[type="radio"]:checked + label { 
+    background-color: rgba(0,106,170,1); 
+    color: #fff; 
+    border-color: rgba(14,168,200,1); 
+}
+</style>
+
+<script>
+const translations = {
+    en: { nameLabel:"Patient's Name", namePlaceholder:"Enter your name", dobLabel:"Date of Birth", appointmentLabel:"What type of appointment do you have today?", dental:"Dental/Cleaning", braces:"Orthodontics/Braces", infoLabel:"Since your last visit, have you had any changes in dental insurance, address, phone number, or email?", yes:"Yes, my information changed", no:"No, my information is the same", submitBtn:"Check In", requiredAlert:"Please fill out all required fields.", thankYouMsg:(name,dob,appt)=>`Thank you ${name}<br>DOB: ${dob}<br>You are checked in for your ${appt} appointment.`, preview:(name,dob,appt)=>`Patient Name: ${name}<br>Patient Date of Birth: ${dob}<br>Appointment Type: ${appt}`, monthsPlaceholder:"Month", dayPlaceholder:"Day", yearPlaceholder:"Year", months:["January","February","March","April","May","June","July","August","September","October","November","December"] },
+    es: { nameLabel:"Nombre del paciente", namePlaceholder:"Ingrese su nombre", dobLabel:"Fecha de nacimiento", appointmentLabel:"¿Qué tipo de cita tiene hoy?", dental:"Dental/Limpieza", braces:"Ortodoncia/Frenos", infoLabel:"Desde su última visita, ¿ha tenido cambios en seguro dental, dirección, teléfono o correo electrónico?", yes:"Sí, mi información cambió", no:"No, mi información sigue igual", submitBtn:"Registrarse", requiredAlert:"Por favor complete todos los campos requeridos.", thankYouMsg:(name,dob,appt)=>`Gracias ${name}<br>Fecha de nacimiento: ${dob}<br>Está registrado para su cita de ${appt}.`, preview:(name,dob,appt)=>`Nombre del paciente: ${name}<br>Fecha de nacimiento: ${dob}<br>Tipo de cita: ${appt}`, monthsPlaceholder:"Mes", dayPlaceholder:"Día", yearPlaceholder:"Año", months:["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"] },
+    vi: { nameLabel:"Tên bệnh nhân", namePlaceholder:"Nhập tên của bạn", dobLabel:"Ngày sinh", appointmentLabel:"Hôm nay bạn có loại hẹn nào?", dental:"Nha khoa/Vệ sinh răng", braces:"Niềng răng/Chỉnh nha", infoLabel:"Kể từ lần khám trước, bạn có thay đổi bảo hiểm nha khoa, địa chỉ, số điện thoại hoặc email không?", yes:"Có, thông tin của tôi đã thay đổi", no:"Không, thông tin của tôi vẫn như cũ", submitBtn:"Đăng ký", requiredAlert:"Vui lòng điền tất cả các trường bắt buộc.", thankYouMsg:(name,dob,appt)=>`Cảm ơn ${name}<br>Ngày sinh: ${dob}<br>Bạn đã đăng ký cho hẹn ${appt}.`, preview:(name,dob,appt)=>`Tên bệnh nhân: ${name}<br>Ngày sinh: ${dob}<br>Loại hẹn: ${appt}`, monthsPlaceholder:"Tháng", dayPlaceholder:"Ngày", yearPlaceholder:"Năm", months:["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"] },
+    zh: { nameLabel:"患者姓名", namePlaceholder:"输入您的姓名", dobLabel:"出生日期", appointmentLabel:"您今天的预约类型？", dental:"牙科/洗牙", braces:"正畸/牙套", infoLabel:"自上次就诊以来，您的牙科保险、地址、电话或电子邮件有变更吗？", yes:"是，我的信息已更改", no:"否，我的信息没有变化", submitBtn:"签到", requiredAlert:"请填写所有必填字段。", thankYouMsg:(name,dob,appt)=>`谢谢 ${name}<br>出生日期: ${dob}<br>您已签到预约${appt}。`, preview:(name,dob,appt)=>`患者姓名: ${name}<br>出生日期: ${dob}<br>预约类型: ${appt}`, monthsPlaceholder:"月", dayPlaceholder:"日", yearPlaceholder:"年", months:["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"] },
+    ko: { nameLabel:"환자 이름", namePlaceholder:"이름을 입력하세요", dobLabel:"생년월일", appointmentLabel:"오늘의 예약 유형은 무엇입니까?", dental:"치과/클리닝", braces:"교정/브레이스", infoLabel:"마지막 방문 이후 치과 보험, 주소, 전화번호 또는 이메일에 변경이 있었습니까?", yes:"예, 정보가 변경되었습니다", no:"아니오, 제 정보는 동일합니다", submitBtn:"체크인", requiredAlert:"모든 필수 항목을 작성해주세요.", thankYouMsg:(name,dob,appt)=>`${name}님 감사합니다.<br>생년월일: ${dob}<br>${appt} 예약이 체크인되었습니다.`, preview:(name,dob,appt)=>`환자 이름: ${name}<br>생년월일: ${dob}<br>예약 유형: ${appt}`, monthsPlaceholder:"월", dayPlaceholder:"일", yearPlaceholder:"년", months:["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"] }
+};
+
+// Capitalize helper
+function capitalizeName(name){
+    return name.split(' ').map(part => 
+        part.split('-').map(sub => sub.charAt(0).toUpperCase() + sub.slice(1).toLowerCase()).join('-')
+    ).join(' ');
+}
+
+function populateDOB(lang){
+    const t = translations[lang];
+    const monthSelect = document.getElementById('dob_month');
+    monthSelect.innerHTML = `<option value="">${t.monthsPlaceholder}</option>` + t.months.map((m,i)=>`<option value="${i+1<10?'0'+(i+1):i+1}">${m}</option>`).join('');
+    const daySelect = document.getElementById('dob_day');
+    daySelect.innerHTML = `<option value="">${t.dayPlaceholder}</option>` + Array.from({length:31},(_,i)=>`<option value="${i+1<10?'0'+(i+1):i+1}">${i+1}</option>`).join('');
+    const yearSelect = document.getElementById('dob_year');
+    yearSelect.innerHTML = `<option value="">${t.yearPlaceholder}</option>` + Array.from({length:2025-1900+1},(_,i)=>`<option value="${2025-i}">${2025-i}</option>`).join('');
+}
+
+function changeLanguage(lang){
+    const t = translations[lang];
+    document.getElementById('nameLabel').innerHTML = t.nameLabel;
+    document.getElementById('name').placeholder = t.namePlaceholder;
+    document.getElementById('dobLabel').innerHTML = t.dobLabel;
+    document.getElementById('appointmentLabel').innerHTML = t.appointmentLabel;
+    document.getElementById('dentalLabel').innerHTML = t.dental;
+    document.getElementById('bracesLabel').innerHTML = t.braces;
+    document.getElementById('infoLabel').innerHTML = t.infoLabel;
+    document.getElementById('yesLabel').innerHTML = t.yes;
+    document.getElementById('noLabel').innerHTML = t.no;
+    document.getElementById('submitBtn').innerHTML = t.submitBtn;
+    document.getElementById('selectedLang').value = lang;
+    populateDOB(lang);
+    updatePreview();
+}
+
+function resetToEnglish(){ document.getElementById('lang-en').checked=true; changeLanguage('en'); }
+
+function getAppointmentTranslation(lang, id){
+    const t = translations[lang];
+    if(id==='dental') return t.dental;
+    if(id==='braces') return t.braces;
+    return '';
+}
+
+function updatePreview(){
+    const lang = document.getElementById('selectedLang').value || 'en';
+    let name = document.getElementById('name').value.trim();
+    name = capitalizeName(name);
+    const month = document.getElementById('dob_month').value;
+    const day = document.getElementById('dob_day').value;
+    const year = document.getElementById('dob_year').value;
+    const dob = month && day && year ? month+'/'+day+'/'+year : '';
+    const appointmentInput = document.querySelector('input[name="entry.678485426"]:checked');
+    const appointment = appointmentInput ? getAppointmentTranslation(lang, appointmentInput.id) : '';
+    const previewDiv = document.getElementById('previewInfo');
+    if(name || dob || appointment){
+        previewDiv.innerHTML = translations[lang].preview(name,dob,appointment);
+        previewDiv.style.display = 'block';
+    } else {
+        previewDiv.style.display = 'none';
+    }
+}
+
+function submitForm(){
+    const lang = document.getElementById('selectedLang').value || 'en';
+    let name = document.getElementById('name').value.trim();
+    name = capitalizeName(name);
+    const month = document.getElementById('dob_month').value;
+    const day = document.getElementById('dob_day').value;
+    const year = document.getElementById('dob_year').value;
+    const dob = month+'/'+day+'/'+year;
+    const appointmentInput = document.querySelector('input[name="entry.678485426"]:checked');
+    const appointment = appointmentInput ? getAppointmentTranslation(lang, appointmentInput.id) : '';
+    const infoInput = document.querySelector('input[name="entry.796169463"]:checked');
+    if(!name||!month||!day||!year||!appointmentInput||!infoInput){ alert(translations[lang].requiredAlert); return false; }
+
+    document.getElementById('dob_hidden').value = dob;
+    document.getElementById('checkinForm').submit();
+
+    // Show thank you
+    const msgDiv = document.getElementById('thankYouMsg');
+    msgDiv.innerHTML = translations[lang].thankYouMsg(name,dob,appointment);
+    msgDiv.style.display='block';
+
+    // Hide everything else
+    const formContent = document.getElementById('formContent');
+    formContent.style.display='none';
+
+    setTimeout(function(){
+        msgDiv.style.display='none';
+        formContent.style.display='block';
+        document.getElementById('checkinForm').reset();
+        document.getElementById('dob_hidden').value='';
+        document.getElementById('previewInfo').style.display='none';
+        resetToEnglish();
+    },3000);
+
+    return false;
+}
+
+// Add ordinal suffix for date
+function getOrdinal(n) {
+    if (n > 3 && n < 21) return 'th';
+    switch (n % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+    }
+}
+
+function updateClock() {
+    const now = new Date();
+
+    // Time
+    const timeString = now.toLocaleTimeString();
+    document.getElementById('clock').textContent = timeString;
+
+    // Date
+    const weekday = now.toLocaleDateString('en-US', { weekday: 'long' });
+    const month = now.toLocaleDateString('en-US', { month: 'long' });
+    const day = now.getDate();
+    const ordinal = getOrdinal(day);
+    const year = now.getFullYear();
+
+    document.getElementById('date').textContent = `${weekday}, ${month} ${day}${ordinal}, ${year}`;
+}
+
+setInterval(updateClock, 1000);
+
+window.onload=function(){
+    populateDOB('en'); 
+    updateClock();
+
+    const nameInput = document.getElementById('name');
+    nameInput.addEventListener('input', function() {
+        const cursorPos = nameInput.selectionStart;
+        nameInput.value = capitalizeName(nameInput.value);
+        nameInput.setSelectionRange(cursorPos, cursorPos);
+        updatePreview();
+    });
+
+    document.getElementById('dob_month').addEventListener('change', updatePreview);
+    document.getElementById('dob_day').addEventListener('change', updatePreview);
+    document.getElementById('dob_year').addEventListener('change', updatePreview);
+    document.querySelectorAll('input[name="entry.678485426"]').forEach(el => el.addEventListener('change', updatePreview));
+};
+</script>
+</head>
+<body>
+<div id="logoContainer">
+    <img src="logo.png" alt="Office Logo">
+</div>
+
+<div id="date"></div>
+<div id="clock"></div>
+
+<div class="lang-group">
+<input type="radio" name="language" id="lang-en" value="en" checked onclick="changeLanguage('en')"><label for="lang-en">English</label>
+<input type="radio" name="language" id="lang-es" value="es" onclick="changeLanguage('es')"><label for="lang-es">Español</label>
+<input type="radio" name="language" id="lang-vi" value="vi" onclick="changeLanguage('vi')"><label for="lang-vi">Tiếng Việt</label>
+<input type="radio" name="language" id="lang-zh" value="zh" onclick="changeLanguage('zh')"><label for="lang-zh">中文</label>
+<input type="radio" name="language" id="lang-ko" value="ko" onclick="changeLanguage('ko')"><label for="lang-ko">한국어</label>
+</div>
+
+<input type="hidden" id="selectedLang" value="en">
+<iframe name="hiddenConfirm" id="hiddenConfirm" style="display:none;"></iframe>
+
+<form id="checkinForm" action="https://docs.google.com/forms/d/e/1FAIpQLSeo7xO3snOMsLs_4ITl7tSt8dpdcYUCUB-BK3728merAlNJcQ/formResponse"
+method="POST" target="hiddenConfirm" onsubmit="return submitForm()">
+
+<div id="thankYouMsg"></div>
+
+<style>
+  #name::placeholder {
+      color: rgba(0,106,170,0.5); 
+      opacity: 1; 
+  }
+</style>
+
+<div id="formContent" class="form-container">
+<label id="nameLabel" for="name">Patient's Name</label>
+<input type="text" name="entry.1036571075" id="name" placeholder="Enter your name" required>
+
+<label id="dobLabel">Date of Birth</label>
+<div class="dob-selects">
+<select id="dob_month" required></select>
+<select id="dob_day" required></select>
+<select id="dob_year" required></select>
+</div>
+<input type="hidden" id="dob_hidden" name="entry.2032528925">
+
+<label id="appointmentLabel">What type of appointment do you have today?</label>
+<div class="toggle-group">
+<input type="radio" name="entry.678485426" id="dental" value="Dental/Cleaning" required>
+<label id="dentalLabel" for="dental">Dental/Cleaning</label>
+<input type="radio" name="entry.678485426" id="braces" value="Orthodontics/Braces" required>
+<label id="bracesLabel" for="braces">Orthodontics/Braces</label>
+</div>
+
+<label id="infoLabel">Since your last visit, have you had any changes in dental insurance, address, phone number, or email?</label>
+<div class="toggle-group">
+<input type="radio" name="entry.796169463" id="yes" value="Yes, my information changed" required>
+<label id="yesLabel" for="yes">Yes, my information changed</label>
+<input type="radio" name="entry.796169463" id="no" value="No, my information is the same" required>
+<label id="noLabel" for="no">No, my information is the same</label>
+</div>
+
+<div id="previewInfo"></div>
+
+<button type="submit" id="submitBtn">Check In</button>
+</div>
+</form>
+</body>
+</html>
